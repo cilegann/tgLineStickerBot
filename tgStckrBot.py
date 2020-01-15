@@ -11,6 +11,7 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 import random
 from configparser import ConfigParser, SafeConfigParser
 import traceback
+from telegram.ext.dispatcher import run_async
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -19,13 +20,16 @@ def randomEmoji():
     emoji="😺😂🤣😇😉😋😌😍😘👀💪🤙🐶🐱🐭🐹🐰🐻🐼🐨🐯🦁🐮🐷🐽🐸🐵🦍🐔🐧🐦🐤🐣🐺🐥🦊🐗🐴🦓🦒🦌🦄🐝🐛🦋🐌🐢🐙🦑🐓🦇🐖🐎🐑🐏🐐🦏🐘🐫🐪🐄🐂🦔🐿🐃🐅🐆🐊🐇🐈🐋🐳🐩🐕🦉🐬🦈🐡🦆🦅🐟🐠🕊🌞🌝🌕🌍🌊⛄✈🚲🛵🏎🚗🚅🌈🗻"
     return random.sample(emoji,1)[0]
 
+@run_async
 def start(bot,update):
     update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/calcel - 取消")
 
+@run_async
 def add(bot,update):
     update.message.reply_text("好的，你要許願哪個貼圖？\n請告訴我 line 貼圖集的網址！\n要取消的話請叫我 /cancel")
     return 0
 
+@run_async
 def continueAdd(bot, update):
     emj=randomEmoji()
     try:
@@ -90,10 +94,12 @@ def continueAdd(bot, update):
         os.remove(f"{fid}.zip")
     return ConversationHandler.END
 
+@run_async
 def upload(bot,update):
     update.message.reply_text("好的，請上傳 line 貼圖集的 zip！\n要取消的話請叫我 /cancel")
     return 0
 
+@run_async
 def continueUpload(bot, update):
     emj=randomEmoji()
     try:
@@ -146,6 +152,7 @@ def continueUpload(bot, update):
         os.remove(f"{fid}.zip")
     return ConversationHandler.END
 
+@run_async
 def delete(bot,update):
     if update.message.from_user.id not in adminId:
         update.message.reply_text("泥素隨？？？？你不能做這件事餒")
@@ -153,6 +160,7 @@ def delete(bot,update):
     update.message.reply_text("把你要刪掉的貼圖傳給我吧！\n要取消的話請叫我 /cancel")
     return 0
 
+@run_async
 def continueDelete(bot,update):
     stickerToDelete=update.message.sticker.file_id
     try:
@@ -162,7 +170,8 @@ def continueDelete(bot,update):
         update.message.reply_text("抱歉....能力所及範圍外")
     finally:
         return ConversationHandler.END
-    
+
+@run_async
 def purge(bot,update):
     if update.message.from_user.id not in adminId:
         update.message.reply_text("泥素隨？？？？你不能做這件事餒")
@@ -170,7 +179,7 @@ def purge(bot,update):
     update.message.reply_text("把你要清空的貼圖集中的一個貼圖傳給我吧！\n要取消的話請叫我 /cancel")
     return 0
     
-
+@run_async
 def continuePurge(bot,update):
     stickerToDelete=update.message.sticker.set_name
     try:
@@ -184,6 +193,7 @@ def continuePurge(bot,update):
     finally:
         return ConversationHandler.END
 
+@run_async
 def cancel(bot,update):
     update.message.reply_text("好的 已經取消動作")
     return ConversationHandler.END
