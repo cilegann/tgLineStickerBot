@@ -63,7 +63,7 @@ def continueAdd(bot, update):
                     bot.deleteStickerFromSet(stk.file_id)
         except telegram.error.BadRequest:
             pass
-        for i,s in enumerate(info['stickers'][:2]):
+        for i,s in enumerate(info['stickers']):
             statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：處理並上傳貼圖 ({i}/{len(info['stickers'])})")
             img=Image.open(f"{fid}/{s['id']}@2x.png")
             ratio=s['width']/s['height']
@@ -92,6 +92,7 @@ def delete(bot,update):
         update.message.reply_text("泥素隨？？？？你不能做這件事餒")
         return ConversationHandler.END
     update.message.reply_text("把你要刪掉的貼圖傳給我吧！\n要取消的話請叫我 /cancel")
+    return 0
 
 def continueDelete(bot,update):
     stickerToDelete=update.message.sticker.file_id
@@ -108,6 +109,7 @@ def purge(bot,update):
         update.message.reply_text("泥素隨？？？？你不能做這件事餒")
         return ConversationHandler.END
     update.message.reply_text("把你要清空的貼圖集中的一個貼圖傳給我吧！\n要取消的話請叫我 /cancel")
+    return 0
     
 
 def continuePurge(bot,update):
