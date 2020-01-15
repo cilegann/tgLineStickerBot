@@ -20,7 +20,7 @@ def randomEmoji():
     return random.sample(emoji,1)[0]
 
 def start(bot,update):
-    update.message.reply_text("/add - 新增貼圖\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/calcel - 取消")
+    update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/calcel - 取消")
 
 def add(bot,update):
     update.message.reply_text("好的，你要許願哪個貼圖？\n請告訴我 line 貼圖集的網址！\n要取消的話請叫我 /cancel")
@@ -52,6 +52,65 @@ def continueAdd(bot, update):
             zip_ref.extractall(fid)
         statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：分析貼圖包")
         info=json.load(open(f"{fid}/productInfo.meta"))
+        enName=info['title']['en']
+        if 'zh-Hant' in info['title']:
+            twName=info['title']['zh-Hant']
+        else:
+            twName=enName
+        stkName=f"line{stkId}_by_{botName}"
+        try:
+            stkSet=bot.getStickerSet(stkName)
+            if len(stkSet.stickers)!=0:
+                statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：更新貼圖集")
+                for stk in stkSet.stickers:
+                    bot.deleteStickerFromSet(stk.file_id)
+        except telegram.error.BadRequest:
+            pass
+        for i,s in enumerate(info['stickers']):
+            statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：處理並上傳貼圖 ({i}/{len(info['stickers'])})")
+            img=Image.open(f"{fid}/{s['id']}@2x.png")
+            ratio=s['width']/s['height']
+            if s['width']>s['height']:
+                img=img.resize((512,int(512/ratio)))
+            else:
+                img=img.resize((int(512*ratio),512))
+            img.save(f"{fid}/{s['id']}@2x.png")
+            try:
+                bot.addStickerToSet(update.message.from_user.id,stkName,open(f"{fid}/{s['id']}@2x.png",'rb'),emj)
+            except telegram.error.BadRequest:
+                bot.createNewStickerSet(update.message.from_user.id,stkName,twName,open(f"{fid}/{s['id']}@2x.png",'rb'),emj)
+        statusMsg.edit_text(f'好惹！')
+        update.message.reply_html(f'給你 <a href="https://t.me/addstickers/{stkName}">{twName}</a> ！')
+    except Exception as e:
+        update.message.reply_text("啊ＧＧ，我有點壞掉了，你等等再試一次好嗎....\n"+str(e))
+        print(traceback.format_exc())
+    finally:
+        import shutil
+        shutil.rmtree(fid)
+        os.remove(f"{fid}.zip")
+    return ConversationHandler.END
+
+def upload(bot,update):
+    update.message.reply_text("好的，請上傳 line 貼圖集的 zip！\n要取消的話請叫我 /cancel")
+    return 0
+
+def continueUpload(bot, update):
+    emj=randomEmoji()
+    try:
+        statusMsg=update.message.reply_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦")
+        fid=str(uuid.uuid1())
+        statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：取得貼圖包")
+        zipFile=update.message.document.get_file()
+        zipFile.download(f"{fid}.zip")
+        stkId=""
+        with zipfile.ZipFile(f"{fid}.zip",'r') as zip_ref:
+            zip_ref.extractall(fid)
+        statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：分析貼圖包")
+        if not os.path.exists(f"{fid}/productInfo.meta"):
+            update.message.reply_text("你上傳的東西好像不是Line的標準貼圖包哦，抱歉啦不能幫你了")
+            return ConversationHandler.END
+        info=json.load(open(f"{fid}/productInfo.meta"))
+        stkId=info['packageId']
         enName=info['title']['en']
         twName=info['title']['zh-Hant']
         stkName=f"line{stkId}_by_{botName}"
@@ -149,6 +208,15 @@ if __name__=="__main__":
         },
         fallbacks=[CommandHandler('cancel',cancel)]
     )
+    uploadHandler=ConversationHandler(
+        entry_points=[ CommandHandler('upload',upload)],
+        states={
+            0:[
+                MessageHandler(Filters.document.mime_type("multipart/x-zip"),continueUpload)
+            ]
+        },
+        fallbacks=[CommandHandler('cancel',cancel)]
+    )
     deleteHandler=ConversationHandler(
         entry_points=[ CommandHandler('delete',delete)],
         states={
@@ -169,6 +237,7 @@ if __name__=="__main__":
     )
 
     updater.dispatcher.add_handler(addHandler)
+    updater.dispatcher.add_handler(uploadHandler)
     updater.dispatcher.add_handler(deleteHandler)
     updater.dispatcher.add_handler(purgeHandler)
     updater.start_polling()
