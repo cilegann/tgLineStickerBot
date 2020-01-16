@@ -128,7 +128,7 @@ def continueUpload(bot, update):
         stkId=""
         with zipfile.ZipFile(f"{fid}.zip",'r') as zip_ref:
             zip_ref.extractall(fid)
-        statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：分析貼圖包")
+        # statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：分析貼圖包")
         if not os.path.exists(f"{fid}/productInfo.meta"):
             update.message.reply_text("你上傳的東西好像不是Line的標準貼圖包哦，抱歉啦不能幫你了")
             return ConversationHandler.END
