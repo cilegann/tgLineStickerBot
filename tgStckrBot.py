@@ -12,6 +12,7 @@ import random
 from configparser import ConfigParser, SafeConfigParser
 import traceback
 from telegram.ext.dispatcher import run_async
+import threading
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -20,38 +21,8 @@ def randomEmoji():
     emoji="😺😂🤣😇😉😋😌😍😘👀💪🤙🐶🐱🐭🐹🐰🐻🐼🐨🐯🦁🐮🐷🐽🐸🐵🦍🐔🐧🐦🐤🐣🐺🐥🦊🐗🐴🦓🦒🦌🦄🐝🐛🦋🐌🐢🐙🦑🐓🦇🐖🐎🐑🐏🐐🦏🐘🐫🐪🐄🐂🦔🐿🐃🐅🐆🐊🐇🐈🐋🐳🐩🐕🦉🐬🦈🐡🦆🦅🐟🐠🕊🌞🌝🌕🌍🌊⛄✈🚲🛵🏎🚗🚅🌈🗻"
     return random.sample(emoji,1)[0]
 
-@run_async
-def start(bot,update):
-    update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/calcel - 取消")
-
-@run_async
-def add(bot,update):
-    update.message.reply_text("好的，你要許願哪個貼圖？\n請告訴我 line 貼圖集的網址！\n要取消的話請叫我 /cancel")
-    return 0
-
-@run_async
-def continueAdd(bot, update):
-    emj=randomEmoji()
+def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
     try:
-        stkUrl=update.message.text
-        if "?" not in stkUrl:
-            rindex=stkUrl.rfind('/')
-            lindex=stkUrl.rfind('/',0,rindex)
-        else:
-            rindex=stkUrl.rfind("?")
-            lindex=stkUrl.rfind("/")
-        if rindex==-1 or lindex==-1:
-            update
-            return
-        stkId=stkUrl[lindex+1:rindex]
-        # stkId="10429834"
-        statusMsg=update.message.reply_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦")
-        statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：抓取貼圖包")
-        myfile=requests.get(f"http://dl.stickershop.line.naver.jp/products/0/0/1/{stkId}/iphone/stickers@2x.zip")
-        fid=stkId
-        with open(f'{fid}.zip','wb') as file:
-            file.write(myfile.content)
-
         with zipfile.ZipFile(f"{fid}.zip",'r') as zip_ref:
             zip_ref.extractall(fid)
         statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：分析貼圖包")
@@ -85,13 +56,59 @@ def continueAdd(bot, update):
                 bot.createNewStickerSet(update.message.from_user.id,stkName,twName,open(f"{fid}/{s['id']}@2x.png",'rb'),emj)
         statusMsg.edit_text(f'好惹！')
         update.message.reply_html(f'給你 <a href="https://t.me/addstickers/{stkName}">{twName}</a> ！')
+    except:
+        statusMsg.edit_text("啊ＧＧ，我有點壞掉了，你等等再試一次好嗎....\n"+str(e))
+        print(traceback.format_exc())
+    finally:
+        try:
+            import shutil
+            shutil.rmtree(fid)
+            os.remove(f"{fid}.zip")
+        except:
+            pass
+
+@run_async
+def start(bot,update):
+    update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/calcel - 取消")
+
+@run_async
+def add(bot,update):
+    update.message.reply_text("好的，你要許願哪個貼圖？\n請告訴我 line 貼圖集的網址！\n要取消的話請叫我 /cancel")
+    return 0
+
+@run_async
+def continueAdd(bot, update):
+    emj=randomEmoji()
+    try:
+        stkUrl=update.message.text
+        if "?" not in stkUrl:
+            rindex=stkUrl.rfind('/')
+            lindex=stkUrl.rfind('/',0,rindex)
+        else:
+            rindex=stkUrl.rfind("?")
+            lindex=stkUrl.rfind("/")
+        if rindex==-1 or lindex==-1:
+            update
+            return
+        stkId=stkUrl[lindex+1:rindex]
+        # stkId="10429834"
+        statusMsg=update.message.reply_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦")
+        statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：抓取貼圖包")
+        myfile=requests.get(f"http://dl.stickershop.line.naver.jp/products/0/0/1/{stkId}/iphone/stickers@2x.zip")
+        fid=stkId
+        with open(f'{fid}.zip','wb') as file:
+            file.write(myfile.content)
+        t=threading.Thread(target=addStickerThread,args=(bot,update,statusMsg,fid,stkId,emj))
+        t.start()
     except Exception as e:
         update.message.reply_text("啊ＧＧ，我有點壞掉了，你等等再試一次好嗎....\n"+str(e))
         print(traceback.format_exc())
-    finally:
-        import shutil
-        shutil.rmtree(fid)
-        os.remove(f"{fid}.zip")
+        try:
+            import shutil
+            shutil.rmtree(fid)
+            os.remove(f"{fid}.zip")
+        except:
+            pass    
     return ConversationHandler.END
 
 @run_async
@@ -117,39 +134,17 @@ def continueUpload(bot, update):
             return ConversationHandler.END
         info=json.load(open(f"{fid}/productInfo.meta"))
         stkId=info['packageId']
-        enName=info['title']['en']
-        twName=info['title']['zh-Hant']
-        stkName=f"line{stkId}_by_{botName}"
-        try:
-            stkSet=bot.getStickerSet(stkName)
-            if len(stkSet.stickers)!=0:
-                statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：更新貼圖集")
-                for stk in stkSet.stickers:
-                    bot.deleteStickerFromSet(stk.file_id)
-        except telegram.error.BadRequest:
-            pass
-        for i,s in enumerate(info['stickers']):
-            statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：處理並上傳貼圖 ({i}/{len(info['stickers'])})")
-            img=Image.open(f"{fid}/{s['id']}@2x.png")
-            ratio=s['width']/s['height']
-            if s['width']>s['height']:
-                img=img.resize((512,int(512/ratio)))
-            else:
-                img=img.resize((int(512*ratio),512))
-            img.save(f"{fid}/{s['id']}@2x.png")
-            try:
-                bot.addStickerToSet(update.message.from_user.id,stkName,open(f"{fid}/{s['id']}@2x.png",'rb'),emj)
-            except telegram.error.BadRequest:
-                bot.createNewStickerSet(update.message.from_user.id,stkName,twName,open(f"{fid}/{s['id']}@2x.png",'rb'),emj)
-        statusMsg.edit_text(f'好惹！')
-        update.message.reply_html(f'給你 <a href="https://t.me/addstickers/{stkName}">{twName}</a> ！')
+        t=threading.Thread(target=addStickerThread,args=(bot,update,statusMsg,fid,stkId,emj))
+        t.start()
     except Exception as e:
         update.message.reply_text("啊ＧＧ，我有點壞掉了，你等等再試一次好嗎....\n"+str(e))
         print(traceback.format_exc())
-    finally:
-        import shutil
-        shutil.rmtree(fid)
-        os.remove(f"{fid}.zip")
+        try:
+            import shutil
+            shutil.rmtree(fid)
+            os.remove(f"{fid}.zip")
+        except:
+            pass  
     return ConversationHandler.END
 
 @run_async
