@@ -53,9 +53,9 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
                 img=img.resize((int(512*ratio),512))
             img.save(f"{fid}/{s['id']}@2x.png")
             try:
-                bot.addStickerToSet(update.message.from_user.id,stkName,open(f"{fid}/{s['id']}@2x.png",'rb'),emj)
+                bot.addStickerToSet(update.message.from_user.id,stkName,emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
             except telegram.error.BadRequest:
-                bot.createNewStickerSet(update.message.from_user.id,stkName,twName,open(f"{fid}/{s['id']}@2x.png",'rb'),emj)
+                bot.createNewStickerSet(update.message.from_user.id,stkName,twName,emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
         statusMsg.edit_text(f'好惹！')
         update.message.reply_html(f'給你 <a href="https://t.me/addstickers/{stkName}">{twName}</a> ！')
     except Exception as e:
