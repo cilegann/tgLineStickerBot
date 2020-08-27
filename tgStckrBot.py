@@ -205,7 +205,7 @@ if __name__=="__main__":
     else:
         botName=os.environ.get('botName')
         botToken=os.environ.get('botToken')
-        adminId=json.loads(os.environ.get('adminId'),"{}")
+        adminId=json.loads(os.environ.get('adminId',"{}"))
 
     updater = Updater(botToken)
 
