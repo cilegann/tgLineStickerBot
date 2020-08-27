@@ -253,5 +253,5 @@ if __name__=="__main__":
     updater.dispatcher.add_handler(purgeHandler)
     #updater.start_polling()
     updater.start_webhook(listen="0.0.0.0",port=8443,url_path=botToken)
-    updater.bot.set_webhook("https://linestkr2tg.herokuapp.com/" + botToken)
+    #updater.bot.set_webhook("https://linestkr2tg.herokuapp.com/" + botToken)
     updater.idle()
