@@ -251,7 +251,9 @@ if __name__=="__main__":
     updater.dispatcher.add_handler(uploadHandler)
     updater.dispatcher.add_handler(deleteHandler)
     updater.dispatcher.add_handler(purgeHandler)
-    #updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",port=int(os.environ.get('PORT', '8443')))
-    updater.bot.set_webhook("https://linestkr2tg.herokuapp.com/")
+    if os.path.exists('secret.cfg'):
+        updater.start_polling()
+    else:
+        updater.start_webhook(listen="0.0.0.0",port=int(os.environ.get('PORT', '8443')))
+        updater.bot.set_webhook("https://linestkr2tg.herokuapp.com/")
     updater.idle()
