@@ -196,12 +196,16 @@ def cancel(bot,update):
     return ConversationHandler.END
 
 if __name__=="__main__":
-
-    cfg=SafeConfigParser(os.environ)
-    cfg.read('secret.cfg')
-    botName=cfg.get('DEFAULT','botName')
-    botToken=cfg.get('DEFAULT','botToken')
-    adminId=json.loads(cfg.get('DEFAULT','adminId'))
+    if os.path.exists('secret.cfg'):
+        cfg=SafeConfigParser(os.environ)
+        cfg.read('secret.cfg')
+        botName=cfg.get('DEFAULT','botName')
+        botToken=cfg.get('DEFAULT','botToken')
+        adminId=json.loads(cfg.get('DEFAULT','adminId'))
+    else:
+        botName=os.environ.get('botName')
+        botToken=os.environ.get('botToken')
+        adminId=json.loads(os.environ.get('adminId'),"{}")
 
     updater = Updater(botToken)
 
