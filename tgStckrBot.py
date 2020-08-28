@@ -71,7 +71,7 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
 
 @run_async
 def start(bot,update):
-    update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/calcel - 取消")
+    update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/cancel - 取消")
 
 @run_async
 def add(bot,update):
