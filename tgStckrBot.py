@@ -29,9 +29,9 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
             zip_ref.extractall(fid)
         statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：分析貼圖包")
         info=json.load(open(f"{fid}/productInfo.meta"))
-        enName=info['title']['en']
+        enName=f"{info['title']['en']}_@{botName}"
         if 'zh-Hant' in info['title']:
-            twName=info['title']['zh-Hant']
+            twName=f"{info['title']['zh-Hant']}_@{botName}"
         else:
             twName=enName
         stkName=f"line{stkId}_by_{botName}"
@@ -71,7 +71,7 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
 
 @run_async
 def start(bot,update):
-    update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/cancel - 取消")
+    update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/cancel - 取消\n免責聲明：此工具目的是協助貼圖創作者方便移植貼圖，請勿侵犯原作者權益。本工具及開發者不承擔任何侵權帶來的法律責任，所有責任皆由使用者承擔。")
 
 @run_async
 def add(bot,update):
