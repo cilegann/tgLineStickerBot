@@ -208,7 +208,8 @@ if __name__=="__main__":
         adminId=json.loads(os.environ.get('adminId',"{}"))
 
     updater = Updater(botToken)
-
+    cancelHandler=CommandHandler('cancel',cancel)
+    updater.dispatcher.add_handler(cancelHandler,group=0)
     updater.dispatcher.add_handler(CommandHandler('start', start))
     addHandler=ConversationHandler(
         entry_points=[ CommandHandler('add',add)],
@@ -217,7 +218,7 @@ if __name__=="__main__":
                 MessageHandler(Filters.text,continueAdd)
             ]
         },
-        fallbacks=[CommandHandler('cancel',cancel)]
+        fallbacks=[cancelHandler]
     )
     uploadHandler=ConversationHandler(
         entry_points=[ CommandHandler('upload',upload)],
@@ -226,7 +227,7 @@ if __name__=="__main__":
                 MessageHandler(Filters.document.mime_type("multipart/x-zip"),continueUpload)
             ]
         },
-        fallbacks=[CommandHandler('cancel',cancel)]
+        fallbacks=[cancelHandler]
     )
     deleteHandler=ConversationHandler(
         entry_points=[ CommandHandler('delete',delete)],
@@ -235,7 +236,7 @@ if __name__=="__main__":
                 MessageHandler(Filters.sticker,continueDelete)
             ]
         },
-        fallbacks=[CommandHandler('cancel',cancel)]
+        fallbacks=[cancelHandler]
     )
     purgeHandler=ConversationHandler(
         entry_points=[ CommandHandler('purge',purge)],
@@ -244,7 +245,7 @@ if __name__=="__main__":
                 MessageHandler(Filters.sticker,continuePurge)
             ]
         },
-        fallbacks=[CommandHandler('cancel',cancel)]
+        fallbacks=[cancelHandler]
     )
 
     updater.dispatcher.add_handler(addHandler)
