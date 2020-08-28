@@ -29,9 +29,9 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
             zip_ref.extractall(fid)
         statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：分析貼圖包")
         info=json.load(open(f"{fid}/productInfo.meta"))
-        enName=f"{info['title']['en']}_@{botName}"
+        enName=f"{info['title']['en']}"
         if 'zh-Hant' in info['title']:
-            twName=f"{info['title']['zh-Hant']}_@{botName}"
+            twName=f"{info['title']['zh-Hant']}"
         else:
             twName=enName
         stkName=f"line{stkId}_by_{botName}"
@@ -55,7 +55,7 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
             try:
                 bot.addStickerToSet(update.message.from_user.id,stkName,emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
             except telegram.error.BadRequest:
-                bot.createNewStickerSet(update.message.from_user.id,stkName,twName,emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
+                bot.createNewStickerSet(update.message.from_user.id,stkName,f"{twName}_@{botName}",emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
         statusMsg.edit_text(f'好惹！')
         update.message.reply_html(f'給你 <a href="https://t.me/addstickers/{stkName}">{twName}</a> ！')
     except Exception as e:
