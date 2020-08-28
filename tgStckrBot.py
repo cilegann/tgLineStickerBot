@@ -209,7 +209,7 @@ if __name__=="__main__":
 
     updater = Updater(botToken)
     cancelHandler=CommandHandler('cancel',cancel)
-    #updater.dispatcher.add_handler(cancelHandler,group=0)
+    updater.dispatcher.add_handler(cancelHandler,group=0)
     updater.dispatcher.add_handler(CommandHandler('start', start))
     addHandler=ConversationHandler(
         entry_points=[ CommandHandler('add',add)],
