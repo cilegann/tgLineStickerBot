@@ -75,7 +75,7 @@ def start(bot,update):
 
 @run_async
 def add(bot,update):
-    update.message.reply_text("好的，你要許願哪個貼圖？\n請告訴我 line 貼圖集的網址！\n要取消的話請叫我 /cancel")
+    update.message.reply_text("好的，你要移植哪個貼圖？\n請告訴我 line 貼圖集的網址！（僅限創作者使用，請勿侵權，請參考 /start 中的說明）\n要取消的話請叫我 /cancel")
     return 0
 
 @run_async
@@ -115,7 +115,7 @@ def continueAdd(bot, update):
 
 @run_async
 def upload(bot,update):
-    update.message.reply_text("好的，請上傳 line 貼圖集的 zip！\n要取消的話請叫我 /cancel")
+    update.message.reply_text("好的，請上傳 line 貼圖集的 zip！（僅限創作者使用，請勿侵權，請參考 /start 中的說明）\n要取消的話請叫我 /cancel")
     return 0
 
 @run_async
