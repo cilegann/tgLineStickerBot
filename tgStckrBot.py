@@ -248,10 +248,10 @@ if __name__=="__main__":
         fallbacks=[cancelHandler]
     )
 
-    updater.dispatcher.add_handler(addHandler,1)
-    updater.dispatcher.add_handler(uploadHandler,1)
-    updater.dispatcher.add_handler(deleteHandler,1)
-    updater.dispatcher.add_handler(purgeHandler,1)
+    updater.dispatcher.add_handler(addHandler)
+    updater.dispatcher.add_handler(uploadHandler)
+    updater.dispatcher.add_handler(deleteHandler)
+    updater.dispatcher.add_handler(purgeHandler)
     if os.path.exists('secret.cfg'):
         updater.start_polling()
     else:
