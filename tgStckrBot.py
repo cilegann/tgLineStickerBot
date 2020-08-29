@@ -217,8 +217,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.text,continueAdd)
             ]
-        },
-        fallbacks=[cancelHandler]
+        }
     )
     uploadHandler=ConversationHandler(
         entry_points=[ CommandHandler('upload',upload)],
@@ -226,8 +225,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.document.mime_type("multipart/x-zip"),continueUpload)
             ]
-        },
-        fallbacks=[cancelHandler]
+        }
     )
     deleteHandler=ConversationHandler(
         entry_points=[ CommandHandler('delete',delete)],
@@ -235,8 +233,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.sticker,continueDelete)
             ]
-        },
-        fallbacks=[cancelHandler]
+        }
     )
     purgeHandler=ConversationHandler(
         entry_points=[ CommandHandler('purge',purge)],
@@ -244,14 +241,13 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.sticker,continuePurge)
             ]
-        },
-        fallbacks=[cancelHandler]
+        }
     )
 
-    updater.dispatcher.add_handler(addHandler,group=1)
-    updater.dispatcher.add_handler(uploadHandler,group=2)
-    updater.dispatcher.add_handler(deleteHandler,group=3)
-    updater.dispatcher.add_handler(purgeHandler,group=4)
+    updater.dispatcher.add_handler(addHandler)
+    updater.dispatcher.add_handler(uploadHandler)
+    updater.dispatcher.add_handler(deleteHandler)
+    updater.dispatcher.add_handler(purgeHandler)
     if os.path.exists('secret.cfg'):
         updater.start_polling()
     else:
