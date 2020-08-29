@@ -217,7 +217,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.text,continueAdd)
             ]
-        }
+        },fallbacks=[]
     )
     uploadHandler=ConversationHandler(
         entry_points=[ CommandHandler('upload',upload)],
@@ -225,7 +225,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.document.mime_type("multipart/x-zip"),continueUpload)
             ]
-        }
+        } ,fallbacks=[]
     )
     deleteHandler=ConversationHandler(
         entry_points=[ CommandHandler('delete',delete)],
@@ -233,7 +233,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.sticker,continueDelete)
             ]
-        }
+        } ,fallbacks=[]
     )
     purgeHandler=ConversationHandler(
         entry_points=[ CommandHandler('purge',purge)],
@@ -241,7 +241,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.sticker,continuePurge)
             ]
-        }
+        } ,fallbacks=[]
     )
 
     updater.dispatcher.add_handler(addHandler)
