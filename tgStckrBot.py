@@ -13,6 +13,7 @@ from configparser import ConfigParser, SafeConfigParser
 import traceback
 from telegram.ext.dispatcher import run_async
 import threading
+import re
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -83,16 +84,19 @@ def continueAdd(bot, update):
     emj=randomEmoji()
     try:
         stkUrl=update.message.text
-        if "?" not in stkUrl:
-            rindex=stkUrl.rfind('/')
-            lindex=stkUrl.rfind('/',0,rindex)
-        else:
-            rindex=stkUrl.rfind("?")
-            lindex=stkUrl.rfind("/")
-        if rindex==-1 or lindex==-1:
-            update
-            return
-        stkId=stkUrl[lindex+1:rindex]
+        #if "?" not in stkUrl:
+        #    rindex=stkUrl.rfind('/')
+        #    lindex=stkUrl.rfind('/',0,rindex)
+        #else:
+        #    rindex=stkUrl.rfind("?")
+        #    lindex=stkUrl.rfind("/")
+        #if rindex==-1 or lindex==-1:
+        #    update
+        #    return
+        #stkId=stkUrl[lindex+1:rindex]
+        r = re.compile("[0-9]{2,}")
+        result = r.search(stkUrl)
+        stkId = result.group(0)
         # stkId="10429834"
         statusMsg=update.message.reply_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦")
         statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：抓取貼圖包")
