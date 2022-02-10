@@ -100,10 +100,16 @@ def continueAdd(bot, update):
         # stkId="10429834"
         statusMsg=update.message.reply_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦")
         statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：抓取貼圖包")
-        myfile=requests.get(f"http://dl.stickershop.line.naver.jp/products/0/0/1/{stkId}/iphone/stickers@2x.zip")
+        dlFile = requests.get(f"https://stickershop.line-scdn.net/stickershop/v1/product/{stkId}/iphone/stickerpack@2x.zip")
+        try:
+            isAnimated = "404 Not Found" in dlFile.content.decode()
+        except UnicodeDecodeError:
+            isAnimated = True
+        if not isAnimated:
+            dlFile=requests.get(f"http://dl.stickershop.line.naver.jp/products/0/0/1/{stkId}/iphone/stickers@2x.zip")
         fid=stkId
         with open(f'{fid}.zip','wb') as file:
-            file.write(myfile.content)
+            file.write(dlFile.content)
         t=threading.Thread(target=addStickerThread,args=(bot,update,statusMsg,fid,stkId,emj))
         t.start()
     except Exception as e:
@@ -114,7 +120,7 @@ def continueAdd(bot, update):
             shutil.rmtree(fid)
             os.remove(f"{fid}.zip")
         except:
-            pass    
+            pass
     return ConversationHandler.END
 
 @run_async
@@ -150,7 +156,7 @@ def continueUpload(bot, update):
             shutil.rmtree(fid)
             os.remove(f"{fid}.zip")
         except:
-            pass  
+            pass
     return ConversationHandler.END
 
 @run_async
@@ -179,7 +185,7 @@ def purge(bot,update):
         return ConversationHandler.END
     update.message.reply_text("把你要清空的貼圖集中的一個貼圖傳給我吧！\n要取消的話請叫我 /cancel")
     return 0
-    
+
 @run_async
 def continuePurge(bot,update):
     stickerToDelete=update.message.sticker.set_name
