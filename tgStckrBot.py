@@ -29,7 +29,7 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
         with zipfile.ZipFile(f"{fid}.zip",'r') as zip_ref:
             zip_ref.extractall(fid)
         statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：分析貼圖包")
-        info=json.load(open(f"{fid}/productInfo.meta"))
+        info=json.load(open(f"{fid}/productInfo.meta", encoding='UTF-8'))
         enName=f"{info['title']['en']}"
         if 'zh-Hant' in info['title']:
             twName=f"{info['title']['zh-Hant']}"
