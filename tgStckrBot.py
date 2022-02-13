@@ -14,7 +14,9 @@ import traceback
 from telegram.ext.dispatcher import run_async
 import threading
 import re
+from animationCvtr import apng2webm
 
+logging.getLogger("telegram").setLevel(logging.INFO)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -24,7 +26,7 @@ def randomEmoji():
     emoji="😺😂🤣😇😉😋😌😍😘👀💪🤙🐶🐱🐭🐹🐰🐻🐼🐨🐯🦁🐮🐷🐽🐸🐵🦍🐔🐧🐦🐤🐣🐺🐥🦊🐗🐴🦓🦒🦌🦄🐝🐛🦋🐌🐢🐙🦑🐓🦇🐖🐎🐑🐏🐐🦏🐘🐫🐪🐄🐂🦔🐿🐃🐅🐆🐊🐇🐈🐋🐳🐩🐕🦉🐬🦈🐡🦆🦅🐟🐠🕊🌞🌝🌕🌍🌊⛄✈🚲🛵🏎🚗🚅🌈🗻"
     return random.sample(emoji,1)[0]
 
-def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
+def addStickerThread(bot,update,statusMsg,fid,stkId,emj, isAnimated=False):
     try:
         with zipfile.ZipFile(f"{fid}.zip",'r') as zip_ref:
             zip_ref.extractall(fid)
@@ -35,7 +37,10 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
             twName=f"{info['title']['zh-Hant']}"
         else:
             twName=enName
-        stkName=f"line{stkId}_by_{botName}"
+        if isAnimated:
+            stkName=f"line{stkId}_an_by_{botName}"
+        else:
+            stkName=f"line{stkId}_by_{botName}"
         try:
             stkSet=bot.getStickerSet(stkName)
             if len(stkSet.stickers)!=0:
@@ -46,17 +51,26 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
             pass
         for i,s in enumerate(info['stickers']):
             statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：處理並上傳貼圖 ({i}/{len(info['stickers'])})")
-            img=Image.open(f"{fid}/{s['id']}@2x.png")
             ratio=s['width']/s['height']
-            if s['width']>s['height']:
-                img=img.resize((512,int(512/ratio)))
+            if not isAnimated:
+                img=Image.open(f"{fid}/{s['id']}@2x.png")
+                if s['width']>s['height']:
+                    img=img.resize((512,int(512/ratio)))
+                else:
+                    img=img.resize((int(512*ratio),512))
+                img.save(f"{fid}/{s['id']}@2x.png")
+                try:
+                    bot.addStickerToSet(update.message.from_user.id,stkName,emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
+                except telegram.error.BadRequest:
+                    bot.createNewStickerSet(update.message.from_user.id,stkName,f"{twName}_@{botName}",emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
             else:
-                img=img.resize((int(512*ratio),512))
-            img.save(f"{fid}/{s['id']}@2x.png")
-            try:
-                bot.addStickerToSet(update.message.from_user.id,stkName,emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
-            except telegram.error.BadRequest:
-                bot.createNewStickerSet(update.message.from_user.id,stkName,f"{twName}_@{botName}",emj,png_sticker=open(f"{fid}/{s['id']}@2x.png",'rb'))
+                apng2webm(f"{fid}/animation@2x/{s['id']}@2x.png")
+                try:
+                    bot.addStickerToSet(update.message.from_user.id,stkName,emj,webm_sticker=open(f"{fid}/animation@2x/{s['id']}@2x.webm",'rb'))
+                except telegram.error.BadRequest as e:
+                    logging.error(e)
+                    bot.createNewStickerSet(update.message.from_user.id,stkName,f"{twName}_@{botName}",emj,webm_sticker=open(f"{fid}/animation@2x/{s['id']}@2x.webm",'rb'))
+
         statusMsg.edit_text(f'好惹！')
         update.message.reply_html(f'給你 <a href="https://t.me/addstickers/{stkName}">{twName}</a> ！')
     except Exception as e:
@@ -70,17 +84,17 @@ def addStickerThread(bot,update,statusMsg,fid,stkId,emj):
         except:
             pass
 
-@run_async
-def start(bot,update):
+# @run_async
+def start(update,context):
     update.message.reply_text("/add - 新增貼圖\n/upload - 上傳Line貼圖zip\n/delete - 刪除某個貼圖\n/purge - 清除貼圖集裡的全部貼圖\n/cancel - 取消\n免責聲明：此工具目的是協助貼圖創作者方便移植貼圖，請勿侵犯原作者權益。本工具及開發者不承擔任何侵權帶來的法律責任，所有責任皆由使用者承擔。")
 
-@run_async
-def add(bot,update):
+# @run_async
+def add(update, context):
     update.message.reply_text("好的，你要移植哪個貼圖？\n請告訴我 line 貼圖集的網址！\n\n（僅限創作者使用，請勿侵權，請參考 /start 中的說明）\n\n要取消的話請叫我 /cancel")
     return 0
 
-@run_async
-def continueAdd(bot, update):
+# @run_async
+def continueAdd( update, context):
     emj=randomEmoji()
     try:
         stkUrl=update.message.text
@@ -110,7 +124,7 @@ def continueAdd(bot, update):
         fid=stkId
         with open(f'{fid}.zip','wb') as file:
             file.write(dlFile.content)
-        t=threading.Thread(target=addStickerThread,args=(bot,update,statusMsg,fid,stkId,emj))
+        t=threading.Thread(target=addStickerThread,args=(context.bot,update,statusMsg,fid,stkId,emj,isAnimated))
         t.start()
     except Exception as e:
         update.message.reply_text("啊ＧＧ，我有點壞掉了，你等等再試一次好嗎....\n"+str(e))
@@ -123,13 +137,13 @@ def continueAdd(bot, update):
             pass
     return ConversationHandler.END
 
-@run_async
-def upload(bot,update):
+# @run_async
+def upload(update,context):
     update.message.reply_text("好的，請上傳 line 貼圖集的 zip！\n\n（僅限創作者使用，請勿侵權，請參考 /start 中的說明）\n\n要取消的話請叫我 /cancel")
     return 0
 
-@run_async
-def continueUpload(bot, update):
+# @run_async
+def continueUpload(update,context):
     emj=randomEmoji()
     try:
         statusMsg=update.message.reply_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦")
@@ -146,7 +160,7 @@ def continueUpload(bot, update):
             return ConversationHandler.END
         info=json.load(open(f"{fid}/productInfo.meta"))
         stkId=info['packageId']
-        t=threading.Thread(target=addStickerThread,args=(bot,update,statusMsg,fid,stkId,emj))
+        t=threading.Thread(target=addStickerThread,args=(context.bot,update,statusMsg,fid,stkId,emj))
         t.start()
     except Exception as e:
         update.message.reply_text("啊ＧＧ，我有點壞掉了，你等等再試一次好嗎....\n"+str(e))
@@ -159,35 +173,35 @@ def continueUpload(bot, update):
             pass
     return ConversationHandler.END
 
-@run_async
-def delete(bot,update):
+# @run_async
+def delete(update,context):
     if update.message.from_user.id not in adminId:
         update.message.reply_text("泥素隨？？？？你不能做這件事餒")
         return ConversationHandler.END
     update.message.reply_text("把你要刪掉的貼圖傳給我吧！\n要取消的話請叫我 /cancel")
     return 0
 
-@run_async
-def continueDelete(bot,update):
+# @run_async
+def continueDelete(update,context):
     stickerToDelete=update.message.sticker.file_id
     try:
-        bot.deleteStickerFromSet(stickerToDelete)
+        context.bot.deleteStickerFromSet(stickerToDelete)
         update.message.reply_text("好惹，我把他從貼圖集移除了")
     except:
         update.message.reply_text("抱歉....能力所及範圍外")
     finally:
         return ConversationHandler.END
 
-@run_async
-def purge(bot,update):
+# @run_async
+def purge(update,context):
     if update.message.from_user.id not in adminId:
         update.message.reply_text("泥素隨？？？？你不能做這件事餒")
         return ConversationHandler.END
     update.message.reply_text("把你要清空的貼圖集中的一個貼圖傳給我吧！\n要取消的話請叫我 /cancel")
     return 0
 
-@run_async
-def continuePurge(bot,update):
+# @run_async
+def continuePurge(update,context):
     stickerToDelete=update.message.sticker.set_name
     try:
         stkSet=bot.getStickerSet(stickerToDelete)
@@ -200,8 +214,8 @@ def continuePurge(bot,update):
     finally:
         return ConversationHandler.END
 
-@run_async
-def cancel(bot,update):
+# @run_async
+def cancel(update,context):
     update.message.reply_text("好的 已經取消動作")
     return ConversationHandler.END
 
@@ -218,16 +232,16 @@ if __name__=="__main__":
         adminId=json.loads(os.environ.get('adminId',"{}"))
 
     updater = Updater(botToken)
-    cancelHandler=CommandHandler('cancel',cancel)
+    cancelHandler=CommandHandler('cancel',cancel, run_async=True)
     #updater.dispatcher.add_handler(cancelHandler,group=0)
-    updater.dispatcher.add_handler(CommandHandler('start', start))
+    updater.dispatcher.add_handler(CommandHandler('start', start, run_async=True))
     addHandler=ConversationHandler(
         entry_points=[ CommandHandler('add',add)],
         states={
             0:[
                 MessageHandler(Filters.text,continueAdd)
             ]
-        },fallbacks=[]
+        },fallbacks=[], run_async=True
     )
     uploadHandler=ConversationHandler(
         entry_points=[ CommandHandler('upload',upload)],
@@ -235,7 +249,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.document.mime_type("multipart/x-zip"),continueUpload)
             ]
-        } ,fallbacks=[]
+        } ,fallbacks=[], run_async=True
     )
     deleteHandler=ConversationHandler(
         entry_points=[ CommandHandler('delete',delete)],
@@ -243,7 +257,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.sticker,continueDelete)
             ]
-        } ,fallbacks=[]
+        } ,fallbacks=[], run_async=True
     )
     purgeHandler=ConversationHandler(
         entry_points=[ CommandHandler('purge',purge)],
@@ -251,7 +265,7 @@ if __name__=="__main__":
             0:[
                 MessageHandler(Filters.sticker,continuePurge)
             ]
-        } ,fallbacks=[]
+        } ,fallbacks=[], run_async=True
     )
 
     updater.dispatcher.add_handler(addHandler)
