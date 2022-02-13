@@ -133,7 +133,7 @@ extensions_dict = {
     "mp4": {"type": "video", "codec": ["libx264", "libmpeg4", "aac"]},
     "mkv": {"type": "video", "codec": ["libx264", "libmpeg4", "aac"]},
     "ogv": {"type": "video", "codec": ["libtheora"]},
-    "webm": {"type": "video", "codec": ["libvpx"]},
+    "webm": {"type": "video", "codec": ["libvpx-vp9"]},
     "avi": {"type": "video"},
     "mov": {"type": "video"},
     "ogg": {"type": "audio", "codec": ["libvorbis"]},

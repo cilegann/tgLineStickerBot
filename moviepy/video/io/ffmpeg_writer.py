@@ -220,7 +220,7 @@ def ffmpeg_write_video(
     clip,
     filename,
     fps,
-    codec="libx264",
+    codec="libvpx-vp9",
     bitrate=None,
     preset="medium",
     with_mask=False,
