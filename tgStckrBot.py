@@ -16,14 +16,15 @@ import threading
 import re
 from animationCvtr import apng2webm
 
-logging.getLogger("telegram").setLevel(logging.INFO)
+logging.getLogger("telegram").setLevel(logging.WARNING)
+logging.getLogger("PIL").setLevel(logging.WARNING)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 #todo: animated url https://stickershop.line-scdn.net/stickershop/v1/sticker/{stickerid}/iPhone/sticker_animation@2x.png
 
 def randomEmoji():
-    emoji="😺😂🤣😇😉😋😌😍😘👀💪🤙🐶🐱🐭🐹🐰🐻🐼🐨🐯🦁🐮🐷🐽🐸🐵🦍🐔🐧🐦🐤🐣🐺🐥🦊🐗🐴🦓🦒🦌🦄🐝🐛🦋🐌🐢🐙🦑🐓🦇🐖🐎🐑🐏🐐🦏🐘🐫🐪🐄🐂🦔🐿🐃🐅🐆🐊🐇🐈🐋🐳🐩🐕🦉🐬🦈🐡🦆🦅🐟🐠🕊🌞🌝🌕🌍🌊⛄✈🚲🛵🏎🚗🚅🌈🗻"
+    emoji="😺😂🤣😇😉😋😌😍😘👀💪🤙🐶🐱🐭🐹🐰🐻🐼🐨🐯🦁🐮🐷🐵🦍🐔🐧🐦🐤🐣🐺🐥🦊🐗🐴🦓🦒🦌🦄🐌🐢🐓🐖🐎🐑🐏🐐🦏🐘🐫🐪🐄🐂🦔🐃🐅🐆🐊🐇🐈🐋🐳🐩🐕🦉🐬🦈🐡🦆🦅🐟🐠🕊🌞🌝🌕🌍🌊⛄✈🚲🛵🏎🚗🚅🌈🗻"
     return random.sample(emoji,1)[0]
 
 def addStickerThread(bot,update,statusMsg,fid,stkId,emj, isAnimated=False):
