@@ -18,7 +18,7 @@ def resizeAnimatedPng(fn):
     frames = []
     for frame in ImageSequence.Iterator(im):
         frames.append(frame.resize((newW, newH)))
-    frames[0].save(fn, save_all = True, append_images = frames[1:], duration = 3, loop = 0)
+    frames[0].save(fn, save_all = True, append_images = frames[1:], duration = im.info['duration'], loop = im.info['loop'], blend = im.info['blend'])
 
 def apng2gif(fn):
     apnggif(fn)
