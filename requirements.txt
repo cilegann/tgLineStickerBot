@@ -1,6 +1,6 @@
 requests==2.23.0
 Pillow
-python-telegram-bot==12.8
+python-telegram-bot==13.11
 apnggif==0.1.4
 numpy
 imageio==2.15.0
