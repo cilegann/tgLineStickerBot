@@ -6,3 +6,4 @@ numpy
 imageio==2.15.0
 decorator==4.4.2
 proglog==0.1.9
+imageio-ffmpeg
