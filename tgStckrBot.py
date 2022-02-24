@@ -12,7 +12,7 @@ import traceback
 from telegram.ext.dispatcher import run_async
 import threading
 import re
-from imageHdl import apng2webm, resizePng
+from imageHdl import apng2webm, tryResizePng
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -44,16 +44,18 @@ def addStickerThread(bot, update, statusMsg, fid, stkId, emj, isAnimated=False):
         for i, s in enumerate(info['stickers']):
             statusMsg.edit_text(f"好窩我試試看！給我一點時間不要急～～\n不要做其他動作哦\n目前進度：處理並上傳貼圖 ({i}/{len(info['stickers'])})")
             pngFile = f"{fid}/animation@2x/{s['id']}@2x.png" if isAnimated else f"{fid}/{s['id']}@2x.png"
-            resizePng(pngFile)
+            wh, fps = tryResizePng(pngFile)
             if isAnimated:
                 try:
-                    bot.addStickerToSet(update.message.from_user.id, stkName, emj, webm_sticker=open(apng2webm(pngFile), 'rb'))
+                    bot.addStickerToSet(update.message.from_user.id, stkName, emj, webm_sticker=open(apng2webm(pngFile, wh, fps), 'rb'))
                 except telegram.error.BadRequest as e:
-                    bot.createNewStickerSet(update.message.from_user.id, stkName, f"{twName}_@{botName}", emj, webm_sticker=open(apng2webm(pngFile),'rb'))
+                    logging.error(e)
+                    bot.createNewStickerSet(update.message.from_user.id, stkName, f"{twName}_@{botName}", emj, webm_sticker=open(apng2webm(pngFile, wh, fps),'rb'))
             else:
                 try:
                     bot.addStickerToSet(update.message.from_user.id, stkName,emj, png_sticker=open(pngFile,'rb'))
-                except telegram.error.BadRequest:
+                except telegram.error.BadRequest as e:
+                    logging.error(e)
                     bot.createNewStickerSet(update.message.from_user.id, stkName, f"{twName}_@{botName}", emj, png_sticker=open(pngFile,'rb'))
 
         statusMsg.edit_text(f'好惹！')
