@@ -1,7 +1,9 @@
 from apnggif import apnggif
 from PIL import Image, ImageSequence
 import os
+import logging
 
+logging.getLogger("apnggif").setLevel(logging.WARNING)
 
 def tryResizePng(fn):
     im = Image.open(fn)
