@@ -50,13 +50,13 @@ def addStickerThread(bot, update, statusMsg, fid, stkId, emj, isAnimated=False):
                     bot.addStickerToSet(update.message.from_user.id, stkName, emj, webm_sticker=open(apng2webm(pngFile, wh, fps), 'rb'))
                 except telegram.error.BadRequest as e:
                     logging.error(e)
-                    bot.createNewStickerSet(update.message.from_user.id, stkName, f"{twName}_@{botName}", emj, webm_sticker=open(apng2webm(pngFile, wh, fps),'rb'))
+                    bot.createNewStickerSet(update.message.from_user.id, stkName, f"{twName}", emj, webm_sticker=open(apng2webm(pngFile, wh, fps),'rb'))
             else:
                 try:
                     bot.addStickerToSet(update.message.from_user.id, stkName,emj, png_sticker=open(pngFile,'rb'))
                 except telegram.error.BadRequest as e:
                     logging.error(e)
-                    bot.createNewStickerSet(update.message.from_user.id, stkName, f"{twName}_@{botName}", emj, png_sticker=open(pngFile,'rb'))
+                    bot.createNewStickerSet(update.message.from_user.id, stkName, f"{twName}", emj, png_sticker=open(pngFile,'rb'))
 
         statusMsg.edit_text(f'好惹！')
         update.message.reply_html(f'給你 <a href="https://t.me/addstickers/{stkName}">{twName}</a> ！')
