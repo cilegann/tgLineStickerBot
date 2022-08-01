@@ -62,7 +62,7 @@ def addStickerThread(bot, update, statusMsg, fid, stkId, emj, isAnimated=False):
         update.message.reply_html(f'給你 <a href="https://t.me/addstickers/{stkName}">{twName}</a> ！')
 
     except Exception as e:
-        statusMsg.edit_text("啊ＧＧ，我有點壞掉了，你等等再試一次好嗎....\n"+str(e))
+        statusMsg.edit_text("啊ＧＧ，我有點壞掉了，你等等再試一次好嗎...\n"+str(e))
         print(traceback.format_exc())
     finally:
         try:
