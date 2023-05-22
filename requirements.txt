@@ -1,4 +1,4 @@
-requests==2.23.0
+requests==2.31.0
 Pillow
 python-telegram-bot==13.11
 apnggif==0.1.4
