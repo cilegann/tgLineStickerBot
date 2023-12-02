@@ -242,5 +242,5 @@ if __name__ == "__main__":
     if os.path.exists('secret.cfg'):
         updater.start_polling()
     else:
-        updater.start_webhook(listen="0.0.0.0",port=int(os.environ.get('PORT', '8443')), webhook_url="https://linestkr2tg.herokuapp.com/")
+        updater.start_webhook(listen="0.0.0.0",port=int(os.environ.get('PORT', '8443')), webhook_url="https://cilegann-strkr-bot-0c51a19f536e.herokuapp.com/")
     updater.idle()
